@@ -2,10 +2,6 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
-#def test_pytest_working():
-#    assert True == True
-#api_client=APIClient()
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,7 +18,7 @@ def test_create_api(api_client) -> None:
                 "passenger_count": 150
             }
                   
-    # Create api to create airplane data
+    # create api to create airplane data
     response_create = api_client.post("/airplane/", payload, format="json")    
     logger.info(f"Response of post: {response_create.data}")  
     assert response_create.status_code == status.HTTP_201_CREATED  
@@ -36,6 +32,40 @@ def test_create_api(api_client) -> None:
     response = dict(response_read.data[0])
     assert response["airplane_id"] == payload["airplane_id"]
 
+
+@pytest.mark.django_db  
+def test_create_api_with_empty_airplaneid(api_client) -> None:  
+    """  
+    Test the creat API with empty airplane id
+    :param api_client:  
+    :return: None  
+    """  
+    payload = {  
+                "airplane_id": '',  
+                "passenger_count": 150
+            }
+                  
+    # create api to create airplane data
+    response_create = api_client.post("/airplane/", payload, format="json")    
+    logger.info(f"Response of post: {response_create.data}")  
+    assert response_create.status_code == status.HTTP_400_BAD_REQUEST
+    
+@pytest.mark.django_db  
+def test_create_api_with_empty_passengercount(api_client) -> None:  
+    """  
+    Test the creat API with empty passenger count
+    :param api_client:  
+    :return: None  
+    """  
+    payload = {  
+                "airplane_id": 100,  
+                "passenger_count": ' ' 
+            }
+                  
+    # create api to create airplane data
+    response_create = api_client.post("/airplane/", payload, format="json")    
+    logger.info(f"Response of post: {response_create.data}")  
+    assert response_create.status_code == status.HTTP_400_BAD_REQUEST
 
 @pytest.mark.django_db  
 def test_get_operation_multiple_inputs(api_client) -> None:  
@@ -96,9 +126,9 @@ def test_update_operation(api_client) -> None:
                 "passenger_count": 250
             }
     response_update = api_client.put(f"/airplane/{payload['airplane_id']}/", payload, format="json")    
-    #logger.info(f"Response of put: {response_update.data}")  
+    logger.info(f"Response of put: {response_update.data}")  
     assert response_update.status_code == status.HTTP_200_OK
-    #assert response_update.data["airplane_id"] == payload["airplane_id"] 
+    assert response_update.data["airplane_id"] == payload["airplane_id"] 
 
     # Read api to confirm that data update
     response_read = api_client.get("/airplane/", format="json")  
@@ -107,6 +137,7 @@ def test_update_operation(api_client) -> None:
     assert len(response_read.data) == 1
     response = dict(response_read.data[0])
     assert response["airplane_id"] == payload["airplane_id"]
+
 
 @pytest.mark.django_db  
 def test_delete_operation(api_client) -> None:  
@@ -134,12 +165,9 @@ def test_delete_operation(api_client) -> None:
     response_delete = api_client.delete(f"/airplane/{payload['airplane_id']}/", payload, format="json")    
     logger.info(f"Response of delete: {response_delete.data}")  
     assert response_delete.status_code == status.HTTP_204_NO_CONTENT
-    #assert response_delete.data["airplane_id"] == payload["airplane_id"] 
 
-    # Read api to confirm that data update
+    # Read api to confirm that data deletion
     response_read = api_client.get(f"/airplane/{payload['airplane_id']}/", format="json")  
     logger.info(f"Response of read: {response_read.data}")
     assert response_read.status_code == status.HTTP_404_NOT_FOUND
-    #assert len(response_read.data) == 1
-    #response = dict(response_read.data[0])
-    #assert response["airplane_id"] == payload["airplane_id"]
+    
