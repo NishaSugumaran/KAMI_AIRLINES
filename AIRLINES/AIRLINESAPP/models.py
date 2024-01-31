@@ -15,10 +15,12 @@ class AirplaneInfo(models.Model):
     #method to calculate fuel consumption in litres
     @property
     def fuel_consumption_inlitres(self): 
+      # type: () -> float
       return (math.log10(self.airplane_id * 0.80)+ (self.passenger_count*0.002))
       
     #method to calculate flying time in minutes
     @property
-    def fly_time_inminutes(self): 
-        return self.fuel_capacity_inlitres/self.fuel_consumption_inlitres
+    def fly_time_inminutes(self):
+      # type: () -> float 
+      return self.fuel_capacity_inlitres/self.fuel_consumption_inlitres
 
